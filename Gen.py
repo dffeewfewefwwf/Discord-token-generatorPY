@@ -1,153 +1,271 @@
-import os
-from os import system
-import httpx
-from base64 import b64encode
-from colorama import init, Fore, Style
-from random import choice
-from threading import RLock, Thread
-from time import time, sleep
-import websocket
-import base64
-from concurrent.futures import ThreadPoolExecutor
-import json
-import random
-init(convert=True)
-folder=r"Data/Avatars"
-captchaApi = "anti-captcha.com" # 2captcha.com anti-captcha.com capmonster.cloud (use anti captcha, other services are patched)
+<?php
+    // EDIT THIS: Insert secret and site key from Google https://www.google.com/recaptcha/admin#list
+    $googleRecaptchaSecret = '6L...';
+    $googleSiteKey         = '6J...';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google reCaptha Demo</title>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <style>
+    <!--
+        body {
+            font-family: Helvetica;
+            font-size: 1.2em;
+        }
+        td {
+            padding: 8px;
+        }
+        h1 {
+            color: white;
+            padding: 9px;
+            border-radius: 8px;
+            background-color: #C9A;
+        }
+        form {
+            background-color: #EDC;
+            border-radius: 8px;
+            padding: 9px;
+        }
+        .ok { color: green; }
+        .ko { color: red;}
+    -->
+    </style>
+</head>
+<body>
+<h1>Google <em>re</em>Captha Demo</h1>
+<?php
+    // Get form parameters
+    $input = $_REQUEST['input1'];
+    $captcha = $_REQUEST['g-recaptcha-response'];
+    $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=" . $googleRecaptchaSecret . 
+            "&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
+    if (isset($input)) {
+        if ($response['success']) {
+            print '<h2 class="ok">reCaptha has been validated!</h2>';
+        } else {
+            print '<h2 class="ko">reCaptha has not been validated!</h2>';
+        }
+        print "<h3>Data received  (\$_REQUEST)</h3><pre>";
+        print_r($_REQUEST);
+        print "\n</pre>
+        <h3>Response from Google</h3><pre>\n";
+        print_r($response);
+        print "</pre>\n";
+    }
+?>
 
-password = "Oxi$tinks"
+<form action="?">
+<!-- Hidden Fields -->
 
-captchaKey = "KEY"
-genStartTime = time()
-generatedTokens = 0
-failedTokens = 0
-erroredTokens = 0
-solved = 0
-class SynchronizedEcho(object):
-    print_lock = RLock()
+<table>
+    <tr>
+        <td>Sample Input field:</td>
+        <td><input name="input1"></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+        <div class="g-recaptcha" data-callback="enableBtn" data-sitekey="<?php echo $googleSiteKey; ?>"></div>
+        </td>
+    </tr>
 
-    def __init__(self, global_lock=True):
-        if not global_lock:
-            self.print_lock = RLock()
+    <tr>
+        <td></td>
+        <td><input type="submit" id="buttonSubmit"></td>
+    </tr>
 
-    def __call__(self, msg):
-        with self.print_lock:
-            print(msg)
+</table>
+</form>
 
-s_print = SynchronizedEcho()
-def username():
-    usernames = open("usernames.txt", encoding="cp437", errors='ignore').read().splitlines()
-    return random.choice(usernames)
+<script>
+// disable submit button until user clicks "I'm not a robot"
+document.getElementById("buttonSubmit").disabled = true;
+function enableBtn(){
+    document.getElementById("buttonSubmit").disabled = false;
+}
+</script>
 
-def generateToken():
-    global generatedTokens
-    global failedTokens
-    global solved
-    global erroredTokens
-    global regReq
-    try:
-        system(f"title Token Generator V1ㅣ{round(generatedTokens / ((time() - genStartTime) / 60))}/mㅣSuccess {generatedTokens}ㅣFailed {failedTokens}ㅣError {erroredTokens} ㅣ Solved {solved}")
+</body>
+</html>
 
-        proxy = ""
-        with open("Proxies.txt", "r") as f:
-            proxy = "http://" + choice(f.readlines()).strip()
+from colorama import Fore, Back, Style
+print(Fore.RED + 'some red text')
+print(Back.GREEN + 'and with a green background')
+print(Style.DIM + 'and in dim text')
+print(Style.RESET_ALL)
+print('back to normal now')
+# Colorama is a module to color the python outputs
+# 1. You have to install python with pip
+# 2. go to your commandline and type:
+#	linux: sudo pip install colorama
+#	windows + mac: pip install colorama
+# 3. wait for the download and then create a new python file
+# 4. use the module colorama
+import colorama
+from colorama import Fore, Back, Style
+# 5. the best way is to use colorama with f-strings
+colorama.init(autoreset=True)#auto resets your settings after every output
 
-        with httpx.Client(cookies={"locale": "en-US"}, headers={"Accept": "*/*", "Accept-Language": "en-US", "Connection": "keep-alive", "Content-Type": "application/json", "DNT": "1", "Host": "discord.com", "Referer": "https://discord.com/", "Sec-Fetch-Dest": "empty", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Site": "same-origin", "TE": "trailers", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0", "X-Track": "eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRmlyZWZveCIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1VUyIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQ7IHJ2Ojk0LjApIEdlY2tvLzIwMTAwMTAxIEZpcmVmb3gvOTQuMCIsImJyb3dzZXJfdmVyc2lvbiI6Ijk0LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6IiIsInJlZmVycmluZ19kb21haW4iOiIiLCJyZWZlcnJlcl9jdXJyZW50IjoiIiwicmVmZXJyaW5nX2RvbWFpbl9jdXJyZW50IjoiIiwicmVsZWFzZV9jaGFubmVsIjoic3RhYmxlIiwiY2xpZW50X2J1aWxkX251bWJlciI6OTk5OSwiY2xpZW50X2V2ZW50X3NvdXJjZSI6bnVsbH0="}, proxies=proxy) as client:
-            client.headers["X-Fingerprint"] = client.get("https://discord.com/api/v9/experiments", timeout=30).json().get("fingerprint")
-            client.headers["Origin"] = "https://discord.com"
-            taskId = ""
-            taskId = httpx.post(f"https://api.{captchaApi}/createTask", json={"clientKey": captchaKey, "task": {"type": "HCaptchaTaskProxyless", "websiteURL": "https://discord.com/", "websiteKey": "f5561ba9-8f1e-40ca-9b5b-a0b3f719ef34", "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"}}, timeout=30).json()
-            if taskId.get("errorId") > 0:
-                s_print(f"{Fore.RED}{Style.BRIGHT}[-] createTask - {taskId.get('errorDescription')}!{Style.RESET_ALL}")
-                erroredTokens += 0
-                return generateToken()
-            taskId = taskId.get("taskId")
-
-
-            captchaTries = 0
-            solvedCaptcha = None
-            while not solvedCaptcha:
-                    captchaData = httpx.post(f"https://api.{captchaApi}/getTaskResult", json={"clientKey": captchaKey, "taskId": taskId}, timeout=30).json()
-                    if captchaData.get("status") == "ready":
-                        solvedCaptcha = captchaData.get("solution").get("gRecaptchaResponse")
-                        solved += 1
-							
+print(f"{Fore.GREEN}green is one of the colors, there are many other colors!")Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+Style: DIM, NORMAL, BRIGHT, RESET_ALL
 
 
-                        regReq = client.post("https://discord.com/api/v9/auth/register", json={"consent": True, "fingerprint": client.headers["X-Fingerprint"], "username": username(), "captcha_key": solvedCaptcha}, timeout=30)
-                        token = regReq.json().get("token")
+websocker-client
+<?php
 
-                        
-                        client.headers["Authorization"] = token
-                        del client.headers["Origin"]
-                        client.headers["Referer"] = "https://discord.com/channels/@me"
-                        client.headers["X-Debug-Options"] = "bugReporterEnabled"
-                        del client.headers["X-Track"]
-                        client.headers["X-Super-Properties"] = "eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRmlyZWZveCIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1VUyIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQ7IHJ2Ojk1LjApIEdlY2tvLzIwMTAwMTAxIEZpcmVmb3gvOTUuMCIsImJyb3dzZXJfdmVyc2lvbiI6Ijk1LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6IiIsInJlZmVycmluZ19kb21haW4iOiIiLCJyZWZlcnJlcl9jdXJyZW50IjoiIiwicmVmZXJyaW5nX2RvbWFpbl9jdXJyZW50IjoiIiwicmVsZWFzZV9jaGFubmVsIjoic3RhYmxlIiwiY2xpZW50X2J1aWxkX251bWJlciI6MTA4OTI0LCJjbGllbnRfZXZlbnRfc291cmNlIjpudWxsfQ=="
+function handshake($connect) 
+{ //Функция рукопожатия
+    $info = array();
+
+    $line = fgets($connect);
+    print_r($line);
+
+    $header = explode(' ', $line);
+    $info['method'] = $header[0];
+    $info['uri'] = $header[1];
+    print_r($info);
+
+    //считываем заголовки из соединения
+    while ($line = rtrim(fgets($connect))) 
+    {
+        if (preg_match('/\A(\S+): (.*)\z/', $line, $matches)) 
+        {
+            $info[$matches[1]] = $matches[2];
+        } else {
+            break;
+        }
+    }
+
+    $address = explode(':', stream_socket_get_name($connect, true)); //получаем адрес клиента
+    $info['ip'] = $address[0];
+    $info['port'] = $address[1];
+
+    if (empty($info['Sec-WebSocket-Key'])) 
+    {
+        return false;
+    }
+    else{
+        echo "Sec-WebSocket-Key is ".$info['Sec-WebSocket-Key']."\r\n";
+    }
+
+    //отправляем заголовок согласно протоколу вебсокета
+    $SecWebSocketAccept = base64_encode(pack('H*', sha1($info['Sec-WebSocket-Key'] . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11')));
+    $upgrade = "HTTP/1.1 101 Web Socket Protocol Handshake\r\n" .
+        "Upgrade: websocket\r\n" .
+        "Connection: Upgrade\r\n" .
+        "Sec-WebSocket-Accept:".$SecWebSocketAccept."\r\n\r\n";
+    fwrite($connect, $upgrade);
+
+    return $info;
+}
+
+function websock_decode($data)
+{
+    $bytes = $data;
+    $data_length = "";
+    $mask = "";
+    $coded_data = "" ;
+    $decoded_data = "";        
+    $data_length = $bytes[1] & 127;
+    if ($data_length === 126)
+    {
+            $mask = substr($bytes, 4, 8);
+            $coded_data = substr($bytes, 8);
+    }
+    else if ($data_length === 127)
+    {
+            $mask = substr($bytes, 10, 14);
+            $coded_data = substr($bytes, 14);
+    }
+    else
+    {
+            $mask = substr($bytes, 2, 6);
+            $coded_data = substr($bytes, 6);
+    }
+    for ($i = 0; $i < strlen($coded_data); $i++)
+    {
+            $decoded_data .= $coded_data[$i] ^ $mask[$i%4];
+    }
+    //echo "Server Received->".$decoded_data."\r\n";
+    return $decoded_data;
+}
+
+header("Content-Type: text/plain; charset=utf-8");
+error_reporting(E_ALL ^ E_WARNING);
+set_time_limit(0);
+ob_implicit_flush();
+
+$NULL = NULL;
+$client_socket = array();
+
+echo "-= Server =-\n\n";     
+
+$address = 'localhost';     
+$port    = 10001;     
+
+$operators_online = array();
 
 
 
-                        email = "".join(choice("abcdefghijklmnopqrstuvwxyz") for i in range(10))
-                        email += "@OxiHasGithub.com"
-                        a=random.choice(os.listdir(folder))
-                        avatar = folder+'\\'+a
-                        imgg = base64.b64encode(open(f"{avatar}", "rb").read()).decode('ascii')
-                        userData = client.patch("https://discord.com/api/v9/users/@me", json={"email": email, "password": password, "date_of_birth": "2000-01-01", "avatar": f"data:image/png;base64,{imgg}"}, timeout=30)
-                        if userData.status_code == 403:
-                            with open("Locked_tokens.txt", "a")as shittoken:
-                                shittoken.write(f"{token}\n")
-                            failedTokens += 1
-                            return generateToken()
 
-                        emailData = ""
-                        ws = websocket.WebSocket();ws.connect('wss://gateway.discord.gg/?v=6&encoding=json');response=ws.recv();event=json.loads(response);auth={'op':2,'d':{'token':token,'capabilities':61,'properties':{'os':'Windows','browser':'Chrome','device':'','system_locale':'en-GB','browser_user_agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36','browser_version':'90.0.4430.212','os_version':'10','referrer':'','referring_domain':'','referrer_current':'','referring_domain_current':'','release_channel':'stable','client_build_number':'85108','client_event_source':'null'},'presence':{'status':'dnd','since':0,'activities':[],'afk':False},'compress':False,'client_state':{'guild_hashes':{},'highest_last_message_id':'0','read_state_version':0,'user_guild_settings_version':-1}}};ws.send(json.dumps(auth));ws.close()
-                        while len(emailData) == 0:
-                            emailData = httpx.get("http://104.128.232.196:12345/api/getInbox?email=" + email).text
+$connects = array();
 
-                        emailToken = httpx.get("https://click.discord.com/ls/click?upn=" + emailData, headers={"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", "Accept-Language": "en-US", "Connection": "keep-alive", "DNT": "1", "Host": "click.discord.com", "Sec-Fetch-Dest": "document", "Sec-Fetch-Mode": "navigate", "Sec-Fetch-Site": "none", "Sec-Fetch-User": "?1", "Upgrade-Insecure-Requests": "1", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0"}).headers.get("location").split("=")[1]
+$socket = stream_socket_server("tcp://127.0.0.1:10001", $errno, $errstr);
+if (!$socket) 
+{
+    echo "socket unavailable<br />";
+    die($errstr. "(" .$errno. ")\n");
+}
 
-                        client.headers["Authorization"] = "undefined"
-                        client.headers["Referer"] = "https://discord.com/verify"
-									
-                        emailData = client.post("https://discord.com/api/v9/auth/verify", json={"token": emailToken, "captcha_key": None}, timeout=30)
-                        if emailData.status_code == 400:
-                            s_print(f"{Fore.RED}{Style.BRIGHT}[-] Captcha on email verify, retrying!")
-                            emailData = client.post("https://discord.com/api/v9/auth/verify", json={"token": emailToken, "captcha_key": None}, timeout=30)
-                            if emailData.status_code == 400:
-                                with open("Unverified_tokens.txt", "a")as shittoken1:
-                                    shittoken1.write(f"{token}\n")
-                                    failedTokens += 1
-                                    return generateToken()
-                            else:
-                                print(f"Succesfully passed captcha on 2nd try!")
-                                pass
+while(true)
+{
 
-                        userData = userData.json()
-                        s_print(f"{Fore.GREEN}{Style.BRIGHT}[+] Token generated - {emailData.json().get('token')} {Style.RESET_ALL}")
+    $read = $connects;
+    $read []= $socket;
+    $write = $except = null;
 
-                        generatedTokens += 1
+    if (!stream_select($read, $write, $except, null)) 
+    {
+        break;
+    }
 
-                        with open("Tokens.txt", "a") as f:
-                            f.write(f"{email}:{password}:{emailData.json().get('token')}\n")
-                            f.close()
-                        with open("Tokens_unformat.txt", "a") as g:
-                            g.write(f"{emailData.json().get('token')}\n")
-                            g.close()
-                            
-    except Exception as e:
-        s_print(f"{Fore.YELLOW}{Style.BRIGHT}[-] Error: {e}{Style.RESET_ALL}")
-        s_print(regReq.text)
-        erroredTokens += 1
-    generateToken()
-if __name__ == "__main__":
-    system("cls")
-    print("Token Generator V1.2\n")
-    threadAmount = input(f"{Fore.BLUE}{Style.BRIGHT}[?] Number of threads -> {Style.RESET_ALL}")
-    threadAmount = 1 if threadAmount == "" else int(threadAmount)
-    system("cls")
-    threads = []
-    with ThreadPoolExecutor(max_workers=threadAmount) as ex : 
-        
-        for x in range(threadAmount):
-            
-            ex.submit(generateToken)
+    if (in_array($socket, $read)) 
+    {//есть соединение - делаем handshake
+        //принимаем новое соединение и производим рукопожатие:
+        if (($connect = stream_socket_accept($socket, -1))) 
+        {
+            if ($info = handshake($connect))
+            {
+                $connects[] = $connect;//добавляем его в список необходимых для обработки
+                echo "Принято подключение (". count($connects) .")\r\n";
+            }
+        }
+        unset($read[ array_search($socket, $read) ]);
+    }
+
+    //проверяем на наличие новых соединений
+    foreach($connects as $key => $client)
+    {
+        if(in_array($client, $read))
+        {
+            //если соединение есть...
+        $input = fread($client, 100000);
+
+            if($input !== false)
+            {
+                //---вот здесь происходит зло!!!-----
+        $input = trim($input);
+                echo websock_decode($input);
+        //----------------------------------
+            }
+        }
+    }
+
+    socket_close($client);
+    $read = $connects;
+    $read[] = $socket;
+}
+?>
