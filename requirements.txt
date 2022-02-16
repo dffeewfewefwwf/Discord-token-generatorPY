@@ -2,3 +2,25 @@ colorama
 futures
 httpx
 websocket-client
+
+from colorama import Fore, Back, Style
+print(Fore.RED + 'some red text')
+print(Back.GREEN + 'and with a green background')
+print(Style.DIM + 'and in dim text')
+print(Style.RESET_ALL)
+print('back to normal now')
+# Colorama is a module to color the python outputs
+# 1. You have to install python with pip
+# 2. go to your commandline and type:
+#	linux: sudo pip install colorama
+#	windows + mac: pip install colorama
+# 3. wait for the download and then create a new python file
+# 4. use the module colorama
+import colorama
+from colorama import Fore, Back, Style
+# 5. the best way is to use colorama with f-strings
+colorama.init(autoreset=True)#auto resets your settings after every output
+
+print(f"{Fore.GREEN}green is one of the colors, there are many other colors!")Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+Style: DIM, NORMAL, BRIGHT, RESET_ALL
