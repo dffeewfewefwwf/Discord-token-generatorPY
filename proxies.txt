@@ -1,1 +1,92 @@
 put proxies here
+<?php
+    // EDIT THIS: Insert secret and site key from Google https://www.google.com/recaptcha/admin#list
+    $googleRecaptchaSecret = '6L...';
+    $googleSiteKey         = '6J...';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google reCaptha Demo</title>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <style>
+    <!--
+        body {
+            font-family: Helvetica;
+            font-size: 1.2em;
+        }
+        td {
+            padding: 8px;
+        }
+        h1 {
+            color: white;
+            padding: 9px;
+            border-radius: 8px;
+            background-color: #C9A;
+        }
+        form {
+            background-color: #EDC;
+            border-radius: 8px;
+            padding: 9px;
+        }
+        .ok { color: green; }
+        .ko { color: red;}
+    -->
+    </style>
+</head>
+<body>
+<h1>Google <em>re</em>Captha Demo</h1>
+<?php
+    // Get form parameters
+    $input = $_REQUEST['input1'];
+    $captcha = $_REQUEST['g-recaptcha-response'];
+    $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=" . $googleRecaptchaSecret . 
+            "&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
+    if (isset($input)) {
+        if ($response['success']) {
+            print '<h2 class="ok">reCaptha has been validated!</h2>';
+        } else {
+            print '<h2 class="ko">reCaptha has not been validated!</h2>';
+        }
+        print "<h3>Data received  (\$_REQUEST)</h3><pre>";
+        print_r($_REQUEST);
+        print "\n</pre>
+        <h3>Response from Google</h3><pre>\n";
+        print_r($response);
+        print "</pre>\n";
+    }
+?>
+ 
+<form action="?">
+<!-- Hidden Fields -->
+ 
+<table>
+    <tr>
+        <td>Sample Input field:</td>
+        <td><input name="input1"></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+        <div class="g-recaptcha" data-callback="enableBtn" data-sitekey="<?php echo $googleSiteKey; ?>"></div>
+        </td>
+    </tr>
+    
+    <tr>
+        <td></td>
+        <td><input type="submit" id="buttonSubmit"></td>
+    </tr>
+    
+</table>
+</form>
+ 
+<script>
+// disable submit button until user clicks "I'm not a robot"
+document.getElementById("buttonSubmit").disabled = true;
+function enableBtn(){
+    document.getElementById("buttonSubmit").disabled = false;
+}
+</script>
+    
+</body>
+</html>
