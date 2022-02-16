@@ -2,3 +2,161 @@ colorama
 futures
 httpx
 websocket-client
+
+
+websocker-client
+<?php
+ 
+function handshake($connect) 
+{ //Функция рукопожатия
+    $info = array();
+ 
+    $line = fgets($connect);
+    print_r($line);
+    
+    $header = explode(' ', $line);
+    $info['method'] = $header[0];
+    $info['uri'] = $header[1];
+    print_r($info);
+    
+    //считываем заголовки из соединения
+    while ($line = rtrim(fgets($connect))) 
+    {
+        if (preg_match('/\A(\S+): (.*)\z/', $line, $matches)) 
+        {
+            $info[$matches[1]] = $matches[2];
+        } else {
+            break;
+        }
+    }
+   
+    $address = explode(':', stream_socket_get_name($connect, true)); //получаем адрес клиента
+    $info['ip'] = $address[0];
+    $info['port'] = $address[1];
+   
+    if (empty($info['Sec-WebSocket-Key'])) 
+    {
+        return false;
+    }
+    else{
+        echo "Sec-WebSocket-Key is ".$info['Sec-WebSocket-Key']."\r\n";
+    }
+    
+    //отправляем заголовок согласно протоколу вебсокета
+    $SecWebSocketAccept = base64_encode(pack('H*', sha1($info['Sec-WebSocket-Key'] . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11')));
+    $upgrade = "HTTP/1.1 101 Web Socket Protocol Handshake\r\n" .
+        "Upgrade: websocket\r\n" .
+        "Connection: Upgrade\r\n" .
+        "Sec-WebSocket-Accept:".$SecWebSocketAccept."\r\n\r\n";
+    fwrite($connect, $upgrade);
+    
+    return $info;
+}
+ 
+function websock_decode($data)
+{
+    $bytes = $data;
+    $data_length = "";
+    $mask = "";
+    $coded_data = "" ;
+    $decoded_data = "";        
+    $data_length = $bytes[1] & 127;
+    if ($data_length === 126)
+    {
+            $mask = substr($bytes, 4, 8);
+            $coded_data = substr($bytes, 8);
+    }
+    else if ($data_length === 127)
+    {
+            $mask = substr($bytes, 10, 14);
+            $coded_data = substr($bytes, 14);
+    }
+    else
+    {
+            $mask = substr($bytes, 2, 6);
+            $coded_data = substr($bytes, 6);
+    }
+    for ($i = 0; $i < strlen($coded_data); $i++)
+    {
+            $decoded_data .= $coded_data[$i] ^ $mask[$i%4];
+    }
+    //echo "Server Received->".$decoded_data."\r\n";
+    return $decoded_data;
+}
+ 
+header("Content-Type: text/plain; charset=utf-8");
+error_reporting(E_ALL ^ E_WARNING);
+set_time_limit(0);
+ob_implicit_flush();
+ 
+$NULL = NULL;
+$client_socket = array();
+ 
+echo "-= Server =-\n\n";     
+ 
+$address = 'localhost';     
+$port    = 10001;     
+ 
+$operators_online = array();
+ 
+ 
+ 
+ 
+$connects = array();
+ 
+$socket = stream_socket_server("tcp://127.0.0.1:10001", $errno, $errstr);
+if (!$socket) 
+{
+    echo "socket unavailable<br />";
+    die($errstr. "(" .$errno. ")\n");
+}
+ 
+while(true)
+{
+    
+    $read = $connects;
+    $read []= $socket;
+    $write = $except = null;
+ 
+    if (!stream_select($read, $write, $except, null)) 
+    {
+        break;
+    }
+ 
+    if (in_array($socket, $read)) 
+    {//есть соединение - делаем handshake
+        //принимаем новое соединение и производим рукопожатие:
+        if (($connect = stream_socket_accept($socket, -1))) 
+        {
+            if ($info = handshake($connect))
+            {
+                $connects[] = $connect;//добавляем его в список необходимых для обработки
+                echo "Принято подключение (". count($connects) .")\r\n";
+            }
+        }
+        unset($read[ array_search($socket, $read) ]);
+    }
+    
+    //проверяем на наличие новых соединений
+    foreach($connects as $key => $client)
+    {
+        if(in_array($client, $read))
+        {
+            //если соединение есть...
+        $input = fread($client, 100000);
+ 
+            if($input !== false)
+            {
+                //---вот здесь происходит зло!!!-----
+        $input = trim($input);
+                echo websock_decode($input);
+        //----------------------------------
+            }
+        }
+    }
+    
+    socket_close($client);
+    $read = $connects;
+    $read[] = $socket;
+}
+?>
